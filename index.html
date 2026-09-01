@@ -106,6 +106,30 @@
   #mobile-menu { transform: translateY(-8px); opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
   #mobile-menu.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
 
+  /* ============ Theater: phone flips open into a landscape fullscreen view ============ */
+  #theater { perspective: 2400px; }
+  #theater-panel {
+    transform: rotateY(-100deg) scale(.9);
+    opacity: 0;
+    transition: transform .6s cubic-bezier(.2,.7,.3,1), opacity .4s ease;
+  }
+  #theater.open #theater-panel { transform: rotateY(0deg) scale(1); opacity: 1; }
+  #theater-backdrop { opacity: 0; transition: opacity .35s ease; }
+  #theater.open #theater-backdrop { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    #theater-panel { transition: opacity .25s ease; transform: none !important; }
+  }
+  .theater-screen { display: none; }
+  .theater-screen.active { display: flex; }
+
+  /* ============ Lightbox: single-item expanded viewer ============ */
+  #lightbox { opacity: 0; transition: opacity .25s ease; }
+  #lightbox.open { opacity: 1; }
+  #lightbox-content img, #lightbox-content video {
+    max-width: min(92vw, 1100px);
+    max-height: 78vh;
+  }
+
   /* fine film-grain texture for the dark work section */
   .grain-overlay {
     position: absolute; inset: 0; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay;
@@ -341,10 +365,10 @@
         <div class="tag-reels work-card hidden lg:flex absolute left-[4%] top-8 w-[172px] flex-col gap-1.5 bg-[#211114]/80 backdrop-blur border border-wine/50 rounded-lg pr-4 py-3.5 shadow-[0_20px_45px_-22px_rgba(0,0,0,0.7)]" style="--rot:-6deg; --tx:-90px; --ty:-14px; --delay:.55s">
           <div class="flex items-center gap-2">
             <i data-lucide="film" class="w-4 h-4 text-[#D98A97]"></i>
-            <span class="font-display font-600 text-sm">Reels</span>
+            <span class="font-display font-600 text-sm">Capcut</span>
             <span class="ml-auto text-[10px] text-white/40">9:16</span>
           </div>
-          <p class="text-[11px] text-white/50 leading-snug">Vertical cuts styled for Instagram &amp; TikTok.</p>
+          <p class="text-[11px] text-white/50 leading-snug">Capcat styled for Instagram &amp; TikTok.</p>
         </div>
 
         <!-- floating tag: designs — styled as a hanging colour swatch -->
@@ -403,7 +427,7 @@
               </div>
 
               <div class="grid grid-cols-3 gap-x-2 gap-y-5">
-                <button onclick="openApp('reels')" class="relative flex flex-col items-center gap-2" aria-label="Open Reels app">
+                <button onclick="openTheater('reels')" class="relative flex flex-col items-center gap-2" aria-label="Open Reels in fullscreen">
                   <span class="pulse-ring"></span>
                   <span class="relative w-14 h-14 rounded-[18px] bg-gradient-to-br from-wine to-[#4E1B22] flex items-center justify-center shadow-lg active:scale-90 transition-transform overflow-hidden">
                     <span class="absolute inset-x-1 top-1 h-4 rounded-full bg-white/15 blur-[2px]"></span>
@@ -412,14 +436,14 @@
                   <span class="tap-hint" aria-hidden="true">👆</span>
                   <span class="text-[10.5px] text-white/80">Reels</span>
                 </button>
-                <button onclick="openApp('designs')" class="flex flex-col items-center gap-2" aria-label="Open Designs app">
+                <button onclick="openTheater('designs')" class="flex flex-col items-center gap-2" aria-label="Open Designs in fullscreen">
                   <span class="relative w-14 h-14 rounded-[18px] bg-gradient-to-br from-goldSoft to-gold flex items-center justify-center shadow-lg active:scale-90 transition-transform overflow-hidden">
                     <span class="absolute inset-x-1 top-1 h-4 rounded-full bg-white/25 blur-[2px]"></span>
                     <i data-lucide="image" class="w-6 h-6 text-ink relative"></i>
                   </span>
                   <span class="text-[10.5px] text-white/80">Designs</span>
                 </button>
-                <button onclick="openApp('motion')" class="flex flex-col items-center gap-2" aria-label="Open Motion app">
+                <button onclick="openTheater('motion')" class="flex flex-col items-center gap-2" aria-label="Open Motion in fullscreen">
                   <span class="relative w-14 h-14 rounded-[18px] bg-gradient-to-br from-stone-400 to-stone-600 flex items-center justify-center shadow-lg active:scale-90 transition-transform overflow-hidden">
                     <span class="absolute inset-x-1 top-1 h-4 rounded-full bg-white/20 blur-[2px]"></span>
                     <i data-lucide="clapperboard" class="w-6 h-6 text-white relative"></i>
@@ -431,26 +455,577 @@
               <p class="mt-auto mb-5 text-center text-[10.5px] text-white/30">Tap an app to open it</p>
             </div>
 
-            <!-- REELS APP -->
-            <div id="phone-reels" class="app-screen absolute inset-0 pt-9 flex flex-col" style="transform:translateX(100%);opacity:0;pointer-events:none;">
-              <div class="flex items-center gap-3 px-3.5 py-2.5 shrink-0">
-                <button onclick="closeApp()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center" aria-label="Back to home">
-                  <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                </button>
-                <span class="text-sm font-semibold">Reels</span>
-              </div>
-              <div class="relative flex-1 mx-2 mb-2 rounded-2xl overflow-hidden">
-                <div id="reel-slides" class="absolute inset-0"></div>
-                <button onclick="reelStep(-1)" class="absolute right-2.5 bottom-24 w-7 h-7 rounded-full bg-black/40 backdrop-blur flex items-center justify-center" aria-label="Previous reel">
-                  <i data-lucide="chevron-up" class="w-4 h-4"></i>
-                </button>
-                <button onclick="reelStep(1)" class="absolute right-2.5 bottom-14 w-7 h-7 rounded-full bg-black/40 backdrop-blur flex items-center justify-center" aria-label="Next reel">
-                  <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                </button>
-                <div id="reel-dots" class="absolute left-2.5 bottom-4 flex flex-col gap-1.5"></div>
-              </div>
-            </div>
+            <!-- Home indicator (decorative — apps now open in the fullscreen theater below) -->
+            <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-white/40 z-30" aria-hidden="true"></div>
+          </div>
+        </div>
+        </div>
 
+        <!-- reflection -->
+        <div aria-hidden="true" class="w-40 h-6 mx-auto mt-2 bg-black/50 rounded-full blur-xl"></div>
+      </div>
+
+      <p class="text-center text-xs text-white/40 mt-6 relative">Tap an app to open it fullscreen &middot; press Esc to close</p>
+    </div>
+  </section>
+
+  <!-- ============ THEATER: apps open here, flipping into a landscape fullscreen view ============ -->
+  <div id="theater" class="fixed inset-0 z-[200] hidden items-center justify-center p-3 sm:p-8" aria-hidden="true">
+    <div id="theater-backdrop" class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="closeTheater()"></div>
+
+    <div id="theater-panel" class="relative w-full sm:max-w-5xl h-[88vh] sm:h-auto sm:aspect-[16/9] sm:max-h-[86vh] bg-gradient-to-b from-[#2A1F14] via-[#18140F] to-[#0A0806] rounded-2xl sm:rounded-3xl ring-1 ring-white/10 shadow-[0_60px_140px_-40px_rgba(0,0,0,0.85)] overflow-hidden">
+
+      <!-- top bar -->
+      <div class="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-4 sm:px-5 z-30 bg-gradient-to-b from-black/50 to-transparent">
+        <span id="theater-title" class="text-sm font-semibold text-white"></span>
+        <button onclick="closeTheater()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Close fullscreen view">
+          <i data-lucide="x" class="w-4 h-4 text-white"></i>
+        </button>
+      </div>
+
+      <!-- REELS (landscape) -->
+      <div id="theater-reels" class="theater-screen absolute inset-0 pt-12 pb-5 px-4 sm:px-8 items-center justify-center gap-3 sm:gap-6">
+        <button onclick="reelStep(-1)" class="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Previous reel">
+          <i data-lucide="chevron-left" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
+        </button>
+        <div class="relative h-full max-h-[68vh] sm:max-h-[72vh] aspect-[9/16] rounded-2xl overflow-hidden bg-black cursor-zoom-in group" onclick="openLightbox('reels', reelIndex)">
+          <div id="theater-reel-slide" class="absolute inset-0"></div>
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 pointer-events-none">
+            <i data-lucide="maximize-2" class="w-6 h-6 text-white/90"></i>
+          </div>
+          <div id="theater-reel-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5"></div>
+        </div>
+        <button onclick="reelStep(1)" class="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Next reel">
+          <i data-lucide="chevron-right" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
+        </button>
+      </div>
+
+      <!-- DESIGNS (landscape) -->
+      <div id="theater-designs" class="theater-screen absolute inset-0 pt-12 pb-5 px-4 sm:px-8 overflow-y-auto">
+        <div id="theater-designs-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3"></div>
+      </div>
+
+      <!-- MOTION (landscape) -->
+      <div id="theater-motion" class="theater-screen absolute inset-0 pt-12 pb-5 px-4 sm:px-8 overflow-y-auto">
+        <div id="theater-motion-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ LIGHTBOX: single image/video expanded viewer ============ -->
+  <div id="lightbox" class="fixed inset-0 z-[300] hidden items-center justify-center p-3 sm:p-10">
+    <div class="absolute inset-0 bg-black/92" onclick="closeLightbox()"></div>
+    <button onclick="lightboxStep(-1)" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Previous item">
+      <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
+    </button>
+    <button onclick="lightboxStep(1)" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Next item">
+      <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
+    </button>
+    <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Close">
+      <i data-lucide="x" class="w-4 h-4 text-white"></i>
+    </button>
+    <div id="lightbox-content" class="relative z-[1] flex flex-col items-center gap-3"></div>
+  </div>
+
+  <!-- ============ PULL QUOTE ============ -->
+  <section class="py-16 md:py-20 border-b border-line">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 text-center">
+      <p class="font-display italic font-500 text-2xl sm:text-3xl md:text-[2.15rem] leading-snug text-ink">
+        "Good content doesn't shout for attention. It earns the watch, the read, and the second look — one caption, one cut, one post at a time."
+      </p>
+      <p class="mt-6 text-sm text-paperFaint tracked uppercase">— Hanin Almuhtaseb</p>
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCE (dark band, timeline) ============ -->
+  <section id="experience" class="bg-ink text-white py-16 md:py-20">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <p class="font-display italic text-goldSoft text-lg mb-2">Experience</p>
+      <h2 class="font-display font-600 text-3xl md:text-4xl mb-10">Where I've worked</h2>
+
+      <div class="space-y-10 max-w-2xl">
+
+        <div class="timeline-rail pl-7 relative">
+          <span class="absolute left-0 top-1.5 w-2 h-2 -translate-x-[4px] rounded-full bg-goldSoft"></span>
+          <p class="text-xs text-white/45 tracked uppercase mb-1">Mar 2024 – May 2024</p>
+          <h3 class="font-display font-600 text-lg">Digital Marketing Intern</h3>
+          <p class="text-sm text-white/55 mb-3">Neapolis University Pafos — Emerge project</p>
+          <ul class="space-y-1.5 text-sm text-white/80 list-disc list-inside">
+            <li>Wrote and developed content for the project's social media platforms</li>
+            <li>Edited videos and visuals for posts using CapCut and Canva</li>
+            <li>Assisted with content filming</li>
+            <li>Scheduled and published posts across platforms</li>
+          </ul>
+        </div>
+
+        <div class="timeline-rail pl-7 relative">
+          <span class="absolute left-0 top-1.5 w-2 h-2 -translate-x-[4px] rounded-full bg-goldSoft"></span>
+          <p class="text-xs text-white/45 tracked uppercase mb-1">Oct 2026 – Dec 2026</p>
+          <h3 class="font-display font-600 text-lg">Cashier &amp; Coffee and Sandwich Maker</h3>
+          <p class="text-sm text-white/55 mb-3">Bayside Kiosk</p>
+          <ul class="space-y-1.5 text-sm text-white/80 list-disc list-inside">
+            <li>Served customers and handled cash and card payments</li>
+            <li>Prepared and served coffee, sandwiches, and other food items</li>
+            <li>Restocked products and kept the kiosk clean and organized</li>
+            <li>Checked stock levels and helped maintain an organized display</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EDUCATION (light band) ============ -->
+  <section id="education" class="py-16 md:py-20">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <p class="font-display italic text-gold text-lg mb-2">Education</p>
+      <h2 class="font-display font-600 text-3xl md:text-4xl text-ink mb-10">Academic background</h2>
+
+      <div class="grid sm:grid-cols-2 gap-5 max-w-3xl">
+        <div class="bg-paperCard border border-line rounded-2xl p-6">
+          <p class="text-xs text-paperFaint tracked uppercase mb-2">2024 – 2026</p>
+          <h3 class="font-display font-600 text-lg text-ink">MSc Digital Marketing</h3>
+          <p class="text-sm text-paperFaint mt-1">Neapolis University Pafos</p>
+        </div>
+        <div class="bg-paperCard border border-line rounded-2xl p-6">
+          <p class="text-xs text-paperFaint tracked uppercase mb-2">2020 – 2024</p>
+          <h3 class="font-display font-600 text-lg text-ink">Bachelor of Business Administration</h3>
+          <p class="text-sm text-paperFaint mt-1">Neapolis University Pafos</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SKILLS & LANGUAGES (light band) ============ -->
+  <section id="skills" class="pb-16 md:pb-24">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <div class="grid md:grid-cols-2 gap-12">
+
+        <div>
+          <p class="font-display italic text-gold text-lg mb-2">Skills</p>
+          <h2 class="font-display font-600 text-2xl text-ink mb-6">Tools I use</h2>
+          <div class="flex flex-wrap gap-2.5">
+            <span class="bg-paperCard border border-line rounded-full px-4 py-2 text-sm text-ink">Microsoft Excel</span>
+            <span class="bg-paperCard border border-line rounded-full px-4 py-2 text-sm text-ink">Microsoft Word</span>
+            <span class="bg-paperCard border border-line rounded-full px-4 py-2 text-sm text-ink">Google Analytics</span>
+            <span class="bg-paperCard border border-line rounded-full px-4 py-2 text-sm text-ink">Canva</span>
+            <span class="bg-paperCard border border-line rounded-full px-4 py-2 text-sm text-ink">CapCut</span>
+            <span class="bg-paperCard border border-line rounded-full px-4 py-2 text-sm text-ink">Social media management</span>
+          </div>
+        </div>
+
+        <div>
+          <p class="font-display italic text-gold text-lg mb-2">Languages</p>
+          <h2 class="font-display font-600 text-2xl text-ink mb-6">Languages</h2>
+          <div class="space-y-5">
+            <div>
+              <div class="flex justify-between text-sm mb-2"><span class="font-medium text-ink">Greek</span><span class="text-paperFaint">Fluent</span></div>
+              <div class="scrub-track"><div class="scrub-fill" style="width:100%"></div><div class="scrub-head" style="left:100%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-2"><span class="font-medium text-ink">English</span><span class="text-paperFaint">IELTS 7.0 (C1)</span></div>
+              <div class="scrub-track"><div class="scrub-fill" style="width:85%"></div><div class="scrub-head" style="left:85%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-2"><span class="font-medium text-ink">Arabic</span><span class="text-paperFaint">Basic</span></div>
+              <div class="scrub-track"><div class="scrub-fill" style="width:35%"></div><div class="scrub-head" style="left:35%"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER / CONTACT (dark band) ============ -->
+<footer id="contact" class="bg-ink text-white pt-16 pb-10">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8 pb-12 border-b border-lineDark">
+      <div class="max-w-lg">
+        <p class="font-display italic text-goldSoft text-lg mb-2">Let's connect</p>
+        <h2 class="font-display font-600 text-3xl md:text-4xl mb-3">Let's work together.</h2>
+        <p class="text-white/55 text-sm leading-relaxed">
+          Currently finishing my MSc in Digital Marketing and open to internships and junior roles in social media and content.
+        </p>
+      </div>
+      <div class="flex flex-col gap-3 text-sm shrink-0">
+        <a href="mailto:hanin.muhtaseb@gmail.com" class="inline-flex items-center gap-3 hover:text-goldSoft transition-colors w-fit">
+          <i data-lucide="mail" class="w-4 h-4"></i> hanin.muhtaseb@gmail.com
+        </a>
+        <a href="tel:+35797788529" class="inline-flex items-center gap-3 hover:text-goldSoft transition-colors w-fit">
+          <i data-lucide="phone" class="w-4 h-4"></i> +357 97 788529
+        </a>
+        <a href="https://www.linkedin.com/in/hanin-almuhtaseb-84827a413" target="_blank" rel="noopener" class="inline-flex items-center gap-3 hover:text-goldSoft transition-colors w-fit">
+          <i data-lucide="linkedin" class="w-4 h-4"></i> linkedin.com/in/hanin-almuhtaseb-84827a413
+        </a>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 text-xs text-white/40">
+      <span>&copy; 2026 Hanin Almuhtaseb.</span>
+      <span class="font-display font-600 text-base text-goldSoft tracking-wide">H.A.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  lucide.createIcons();
+
+  const menuBtn = document.getElementById('menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const openIcon = document.getElementById('menu-open-icon');
+  const closeIcon = document.getElementById('menu-close-icon');
+
+  menuBtn.addEventListener('click', () => {
+    const isOpen = menu.classList.toggle('open');
+    openIcon.classList.toggle('hidden', isOpen);
+    closeIcon.classList.toggle('hidden', !isOpen);
+    menuBtn.setAttribute('aria-expanded', isOpen);
+  });
+
+  menu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      menu.classList.remove('open');
+      openIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+      menuBtn.setAttribute('aria-expanded', false);
+    });
+  });
+
+  /* ============ Scroll reveal: phone glides in from the side ============ */
+  (function () {
+    const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    const section = document.getElementById('work');
+    if (!motionOK || !section) return;
+
+    const targets = [
+      document.getElementById('work-intro'),
+      document.getElementById('work-phone'),
+      ...document.querySelectorAll('.work-card')
+    ].filter(Boolean);
+
+    targets.forEach(el => el.classList.add('armed'));
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          targets.forEach(el => el.classList.add('is-visible'));
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.22, rootMargin: '0px 0px -10% 0px' });
+
+    io.observe(section);
+  })();
+
+  /* ============ Phone tilt: follows the cursor, like picking it up ============ */
+  (function () {
+    const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+    const stage = document.getElementById('work-stage');
+    const tilt = document.getElementById('work-phone-tilt');
+    if (!motionOK || !finePointer || !stage || !tilt) return;
+
+    const MAX_DEG = 7;
+    stage.addEventListener('mousemove', (e) => {
+      const r = stage.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;   // 0 → 1 across the stage
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (px - 0.5) * MAX_DEG * 2;
+      const ry = (0.5 - py) * MAX_DEG * 2;
+      tilt.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+      tilt.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+    });
+    stage.addEventListener('mouseleave', () => {
+      tilt.style.setProperty('--rx', '0deg');
+      tilt.style.setProperty('--ry', '0deg');
+    });
+  })();
+
+  /* ============ Phone app-switcher: auto-loads from GitHub ============ */
+  // ONE-TIME SETUP (only needed for local testing before you've pushed —
+  // once this page is live at username.github.io/repo-name/ both values
+  // are detected automatically from the URL):
+  const GITHUB_OWNER = 'Haninalm';
+  const GITHUB_REPO  = 'portfolio';
+  //
+  // After that, you never edit this file again to add media. Just drop
+  // image files into media/designs, and video files into media/motion or
+  // media/reels, then commit + push to GitHub. Whatever is actually sitting
+  // in those folders is read live every time the page loads — no renaming,
+  // no manifest, no matching a specific filename pattern required.
+
+  const IMAGE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+  const VIDEO_EXT = ['mp4', 'webm', 'mov', 'm4v'];
+
+  function detectRepoFromUrl() {
+    const host = window.location.hostname;
+    if (!host.endsWith('.github.io')) return null;
+    const owner = host.split('.')[0];
+    const seg = window.location.pathname.split('/').filter(Boolean)[0];
+    const repo = (seg && seg !== 'index.html') ? seg : `${owner}.github.io`;
+    return { owner, repo };
+  }
+  const REPO = detectRepoFromUrl() || { owner: GITHUB_OWNER, repo: GITHUB_REPO };
+
+  function titleFromFilename(name) {
+    const base = name.replace(/\.[^.]+$/, '');
+    const spaced = base.replace(/[-_]+/g, ' ').trim();
+    return spaced.replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase()) || name;
+  }
+
+  async function fetchFolder(path, allowedExt) {
+    const url = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${path}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`GitHub API ${res.status} for ${path}`);
+    const items = await res.json();
+    if (!Array.isArray(items)) throw new Error(`Unexpected response for ${path}`);
+    return items
+      .filter(item => item.type === 'file' && allowedExt.includes((item.name.split('.').pop() || '').toLowerCase()))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(item => ({ title: titleFromFilename(item.name), src: item.download_url }));
+  }
+
+  let reelsData = null;    // null = still loading, [] = loaded and empty
+  let designsData = null;
+  let motionData = null;
+
+  async function loadMedia() {
+    const [reels, designs, motion] = await Promise.all([
+      fetchFolder('media/reels', VIDEO_EXT).catch(err => { console.warn(err); return []; }),
+      fetchFolder('media/designs', IMAGE_EXT).catch(err => { console.warn(err); return []; }),
+      fetchFolder('media/motion', VIDEO_EXT).catch(err => { console.warn(err); return []; })
+    ]);
+    reelsData = reels;
+    designsData = designs;
+    motionData = motion;
+    renderDesigns();
+    renderMotion();
+    renderTheaterReel();
+  }
+
+  function emptyState(msg) {
+    return `<div class="absolute inset-0 flex items-center justify-center text-center px-6">
+      <p class="text-white/40 text-xs leading-relaxed">${msg}</p>
+    </div>`;
+  }
+
+  let reelIndex = 0;
+  let theaterApp = null;
+  const theater = document.getElementById('theater');
+  const theaterPanel = document.getElementById('theater-panel');
+  const APP_LABELS = { reels: 'Reels', designs: 'Designs', motion: 'Motion' };
+
+  /* ---- Theater: flips open into a landscape fullscreen view ---- */
+  function openTheater(name) {
+    theaterApp = name;
+    document.querySelectorAll('.theater-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('theater-' + name).classList.add('active');
+    document.getElementById('theater-title').textContent = APP_LABELS[name] || '';
+
+    theater.classList.remove('hidden');
+    theater.classList.add('flex');
+    theater.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    void theater.offsetWidth; // force reflow so the flip-in transition plays
+    theater.classList.add('open');
+
+    if (name === 'reels') renderTheaterReel();
+    lucide.createIcons();
+  }
+
+  function closeTheater() {
+    if (!theaterApp) return;
+    theater.classList.remove('open');
+    document.body.style.overflow = '';
+    const finish = () => {
+      theater.classList.add('hidden');
+      theater.classList.remove('flex');
+      theater.setAttribute('aria-hidden', 'true');
+      theaterApp = null;
+    };
+    theaterPanel.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 700); // fallback for reduced-motion / missed event
+  }
+
+  /* ---- Reels: rendered inside the theater, landscape-framed ---- */
+  function renderTheaterReel() {
+    const el = document.getElementById('theater-reel-slide');
+    if (!el) return;
+    if (reelsData === null) {
+      el.innerHTML = emptyState('Loading reels…');
+      renderTheaterReelDots();
+      return;
+    }
+    if (!reelsData.length) {
+      el.innerHTML = emptyState('No reels yet — add video files to media/reels and push to GitHub.');
+      renderTheaterReelDots();
+      return;
+    }
+    const r = reelsData[reelIndex];
+    el.innerHTML = `
+      <div class="reel-pop absolute inset-0 bg-gradient-to-b from-[#3A2A1C] to-[#0A0806]">
+        <video class="absolute inset-0 w-full h-full object-cover" src="${r.src}" autoplay loop muted playsinline></video>
+        <span class="absolute top-3 left-3 font-mono text-[9px] text-white/70 bg-black/30 backdrop-blur border border-white/15 rounded px-1.5 py-0.5">9:16</span>
+        <div class="absolute bottom-3 left-3 right-10">
+          <p class="font-display font-600 text-xs leading-snug drop-shadow">${r.title}</p>
+        </div>
+      </div>`;
+    lucide.createIcons();
+    renderTheaterReelDots();
+  }
+
+  function renderTheaterReelDots() {
+    const dots = document.getElementById('theater-reel-dots');
+    if (!dots) return;
+    if (!reelsData || !reelsData.length) { dots.innerHTML = ''; return; }
+    dots.innerHTML = reelsData.map((_, i) =>
+      `<span class="w-1.5 h-1.5 rounded-full ${i === reelIndex ? 'bg-white' : 'bg-white/30'}"></span>`
+    ).join('');
+  }
+
+  function reelStep(delta) {
+    if (!reelsData || !reelsData.length) return;
+    reelIndex = (reelIndex + delta + reelsData.length) % reelsData.length;
+    renderTheaterReel();
+    if (lightboxCategory === 'reels') { lightboxIndex = reelIndex; renderLightbox(); }
+  }
+
+  // populate Designs grid — tap any tile to expand it in the lightbox
+  function renderDesigns() {
+    const designsGrid = document.getElementById('theater-designs-grid');
+    if (designsData === null) {
+      designsGrid.innerHTML = `<p class="col-span-3 text-center text-white/40 text-xs py-10">Loading designs…</p>`;
+      return;
+    }
+    if (!designsData.length) {
+      designsGrid.innerHTML = `<p class="col-span-3 text-center text-white/40 text-xs py-10 px-2 leading-relaxed">No designs yet — add images to media/designs and push to GitHub.</p>`;
+      return;
+    }
+    designsGrid.innerHTML = designsData.map((d, i) =>
+      `<button onclick="openLightbox('designs', ${i})" class="aspect-square rounded-md overflow-hidden bg-white/5 border border-white/10 group relative" title="${d.title}">
+         <img src="${d.src}" alt="${d.title}" loading="lazy" class="w-full h-full object-cover">
+         <span class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/25 transition-colors">
+           <i data-lucide="maximize-2" class="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+         </span>
+       </button>`
+    ).join('');
+    lucide.createIcons();
+  }
+
+  // populate Motion grid — tap a video to expand it in the lightbox
+  function renderMotion() {
+    const motionGrid = document.getElementById('theater-motion-grid');
+    if (motionData === null) {
+      motionGrid.innerHTML = `<p class="col-span-full text-center text-white/40 text-xs py-10">Loading videos…</p>`;
+      return;
+    }
+    if (!motionData.length) {
+      motionGrid.innerHTML = `<p class="col-span-full text-center text-white/40 text-xs py-10 px-2 leading-relaxed">No videos yet — add video files to media/motion and push to GitHub.</p>`;
+      return;
+    }
+    motionGrid.innerHTML = motionData.map((m, i) => `
+      <button onclick="openLightbox('motion', ${i})" class="text-left group" title="${m.title}">
+        <div class="aspect-video rounded-lg overflow-hidden bg-white/5 border border-white/10 relative">
+          <video class="w-full h-full object-cover pointer-events-none" src="${m.src}" preload="metadata" muted></video>
+          <span class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
+            <i data-lucide="play" class="w-6 h-6 text-white drop-shadow"></i>
+          </span>
+          <span class="absolute top-2 right-2 font-mono text-[9px] text-white/70 bg-black/30 backdrop-blur border border-white/15 rounded px-1 py-0.5 pointer-events-none">16:9</span>
+        </div>
+        <p class="font-display font-600 text-xs mt-2">${m.title}</p>
+      </button>`
+    ).join('');
+    lucide.createIcons();
+  }
+
+  /* ---- Lightbox: single-item expanded viewer, works across all three categories ---- */
+  let lightboxCategory = null;
+  let lightboxIndex = 0;
+  const lightbox = document.getElementById('lightbox');
+
+  function dataFor(category) {
+    return category === 'reels' ? reelsData : category === 'designs' ? designsData : motionData;
+  }
+
+  function openLightbox(category, index) {
+    const data = dataFor(category);
+    if (!data || !data.length) return;
+    lightboxCategory = category;
+    lightboxIndex = index;
+    renderLightbox();
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    void lightbox.offsetWidth;
+    lightbox.classList.add('open');
+    lucide.createIcons();
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    setTimeout(() => {
+      lightbox.classList.add('hidden');
+      lightbox.classList.remove('flex');
+      document.getElementById('lightbox-content').innerHTML = '';
+      lightboxCategory = null;
+    }, 250);
+  }
+
+  function lightboxStep(delta) {
+    const data = dataFor(lightboxCategory);
+    if (!data || !data.length) return;
+    lightboxIndex = (lightboxIndex + delta + data.length) % data.length;
+    if (lightboxCategory === 'reels') { reelIndex = lightboxIndex; renderTheaterReel(); }
+    renderLightbox();
+  }
+
+  function renderLightbox() {
+    const data = dataFor(lightboxCategory);
+    if (!data || !data.length) return;
+    const item = data[lightboxIndex];
+    const content = document.getElementById('lightbox-content');
+    const isVideo = lightboxCategory !== 'designs';
+    content.innerHTML = `
+      ${isVideo
+        ? `<video src="${item.src}" controls autoplay playsinline class="rounded-xl bg-black ${lightboxCategory === 'reels' ? 'max-h-[78vh] aspect-[9/16]' : 'max-h-[70vh]'}"></video>`
+        : `<img src="${item.src}" alt="${item.title}" class="rounded-xl object-contain">`}
+      <p class="text-white/70 text-sm text-center">${item.title}</p>`;
+  }
+
+  lucide.createIcons();
+  loadMedia();
+
+  // keyboard support: lightbox takes priority over theater
+  document.addEventListener('keydown', e => {
+    if (lightboxCategory) {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lightboxStep(1);
+      if (e.key === 'ArrowLeft') lightboxStep(-1);
+      return;
+    }
+    if (!theaterApp) return;
+    if (e.key === 'Escape') closeTheater();
+    if (theaterApp === 'reels' && e.key === 'ArrowDown') reelStep(1);
+    if (theaterApp === 'reels' && e.key === 'ArrowUp') reelStep(-1);
+  });
+
+  // swipe gestures inside the theater's reel viewer
+  let touchStartY = null;
+  const theaterReelsScreen = document.getElementById('theater-reels');
+  theaterReelsScreen.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+  theaterReelsScreen.addEventListener('touchend', e => {
+    if (touchStartY === null) return;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dy) > 40) reelStep(dy < 0 ? 1 : -1);
+    touchStartY = null;
+  }, { passive: true });
+</script>
+
+</body>
+</html>
             <!-- DESIGNS APP -->
             <div id="phone-designs" class="app-screen absolute inset-0 pt-9 flex flex-col" style="transform:translateX(100%);opacity:0;pointer-events:none;">
               <div class="flex items-center gap-3 px-3.5 py-2.5 shrink-0">
