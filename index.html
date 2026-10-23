@@ -200,6 +200,22 @@
   .sheet mark { background:linear-gradient(transparent 45%, rgba(255,205,70,.8) 45%); color:inherit; padding:0 .12em; }
   .circled { display:inline-block; border:2px solid #C0392B; border-radius:50%; padding:0 .55em; line-height:1.3; transform:rotate(-2deg); }
   .note { margin-top:.6rem; text-align:right; font-size:1.35rem; font-weight:600; color:#C0392B; transform:rotate(-2deg); }
+  .sheet-more { display:none; }
+  .sheet-open .sheet-more { display:block; }
+  .sheet-open .sheet-prompt { display:none; }
+  .sheet-btn { position:absolute; inset:0; width:100%; height:100%; z-index:5; background:transparent; cursor:pointer; border-radius:.35rem; }
+  .sheet { transition:transform .3s ease, box-shadow .3s ease; }
+  @media (hover:hover) { .sheet:not(.sheet-open):hover { transform:rotate(0deg) translateY(-6px); } }
+  .sheet-open { transform:none !important; margin-top:0 !important; }
+  .sheet-open .hand-list { font-size:1.5rem; }
+  .sheet-prompt { margin-top:.5rem; text-align:right; font-size:10px; letter-spacing:.16em; text-transform:uppercase; font-weight:600; color:#7A7266; }
+  .sheet-open .sheet-more { border-top:2px dashed rgba(122,46,57,.35); margin-top:1rem; padding-top:.5rem; }
+  .sheet-more p, .more-list li { font-size:13px; line-height:1.75rem; color:#4a4036; }
+  .more-list li { margin-bottom:.35rem; line-height:1.55rem; }
+  .more-list strong { color:#18140F; }
+  .more-h { font-size:1.7rem; font-weight:700; color:#7A2E39; line-height:1; margin-top:1rem; margin-bottom:.15rem; }
+  #study-modal { opacity:0; transition:opacity .25s ease; }
+  #study-modal.open { opacity:1; }
 </style>
 </head>
 <body class="antialiased">
@@ -364,6 +380,21 @@
     <div id="lightbox-content" class="relative z-[1] flex flex-col items-center gap-3"></div>
   </div>
 
+  <!-- ============ STUDY WINDOW: opens a notebook page in front ============ -->
+  <div id="study-modal" class="fixed inset-0 z-[300] hidden items-center justify-center p-3 sm:p-8" role="dialog" aria-modal="true" aria-label="Project details">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#2A1F14]/95 via-[#18140F]/96 to-[#0A0806]/97 backdrop-blur-md" onclick="closeStudy()"></div>
+    <button onclick="studyStep(-1)" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Previous project">
+      <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
+    </button>
+    <button onclick="studyStep(1)" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Next project">
+      <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
+    </button>
+    <button onclick="closeStudy()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Close">
+      <i data-lucide="x" class="w-4 h-4 text-white"></i>
+    </button>
+    <div id="study-content" class="relative z-[1] w-full max-w-xl max-h-[86vh] overflow-y-auto px-2"></div>
+  </div>
+
   <!-- ============ EXPERIENCE (dark band, timeline) ============ -->
   <section id="experience" class="bg-ink text-white py-16 md:py-20">
     <div class="max-w-6xl mx-auto px-5 sm:px-8">
@@ -453,7 +484,7 @@
       <p class="font-display italic text-goldSoft text-lg mb-2">Neapolis University Pafos</p>
       <h2 class="font-display font-600 text-3xl md:text-4xl mb-3">Projects from My Studies</h2>
       <div class="w-16 h-px bg-gold mb-5"></div>
-      <p class="text-sm md:text-base text-white/60 leading-relaxed max-w-xl mb-12">Pages from my study notebook, marked up the way I work. Some use fictional companies, and each one is labelled so.</p>
+      <p class="text-sm md:text-base text-white/60 leading-relaxed max-w-xl mb-12">Pages from my study notebook, marked up the way I work. Tap a page to read more. Some use fictional companies, and each one is labelled so.</p>
       <div class="grid md:grid-cols-2 gap-x-10 gap-y-12">
         <article class="sheet" style="--r:-1.4deg">
           <div class="pl-14 pr-5 pt-6 pb-5">
@@ -465,7 +496,10 @@
             <p class="text-[13px] text-[#4a4036] leading-7 mt-1">A data-driven plan to refresh the image of retsina, a traditional Greek PGI wine, and grow both mainstream and premium lines.</p>
             <ul class="hand-list"><li>SWOT, macro-environment and <mark>competitor analysis</mark></li><li>Differentiation and focus positioning (Porter)</li><li>Tasting kits, 250ml HoReCa bottles and <mark>QR storytelling</mark></li><li>Roadmap targeting a <span class="circled">5% revenue</span> increase</li></ul>
             <p class="hand note">&larr; real brand, full plan</p>
+            <p class="sheet-prompt">Tap to read more &rarr;</p>
+            <div class="sheet-more"><h4 class="hand more-h">Overview</h4><p>A comprehensive, data-driven marketing plan for Kechris Winery, a pioneer of Greek winemaking. The goal was to revitalise the perception of retsina, a traditional Greek PGI product, and speed up sales of both mainstream lines (such as Kehribari) and premium innovations (“Daktytou Pefkou” and “Roza”).</p><h4 class="hand more-h">What I did</h4><ul class="more-list"><li><strong>Environment analysis:</strong> macro-environment assessment, competitor mapping against major industry players and a full SWOT, pointing to growth in wine tourism and premiumisation.</li><li><strong>Positioning:</strong> Porter’s strategies of differentiation and focus, moving the brand away from price wars and onto product innovation, quality and cultural heritage.</li><li><strong>SMART objectives:</strong> annual targets across all seven Ps (Product, Price, Place, Promotion, People, Process, Physical Evidence), aimed at a 5% rise in annual net revenues.</li></ul><h4 class="hand more-h">Recommendations</h4><ul class="more-list"><li><strong>Product and packaging:</strong> curated 4-item tasting kits for souvenir and tourism markets, and individual 250ml bottles for HoReCa.</li><li><strong>Digital storytelling:</strong> QR codes on packaging that tell the history of retsina, plus a B2B digital ordering platform.</li><li><strong>Experiential marketing:</strong> Instagram and Facebook campaigns combined with on-site tastings in major Greek cities and tourist islands.</li><li><strong>Roadmap:</strong> a matrix of task owners, departments, timelines and budget for a full fiscal year.</li></ul><h4 class="hand more-h">Outcome</h4><p>The strategy shows how traditional heritage can be turned into a modern, high-value proposition, aimed at growing profitability, distribution and brand equity.</p></div>
           </div>
+          <button type="button" class="sheet-btn" onclick="openStudy(this)" aria-label="Read the full project"></button>
         </article>
         <article class="sheet" style="--r:1.2deg">
           <div class="pl-14 pr-5 pt-6 pb-5">
@@ -477,7 +511,10 @@
             <p class="text-[13px] text-[#4a4036] leading-7 mt-1">A simulated Facebook crisis for an energy company: calm the backlash, counter misinformation and rebuild trust.</p>
             <ul class="hand-list"><li><mark>Real-time, empathetic</mark> and fact-based replies</li><li>Crisis team split into community managers, statement writers and content creators</li><li>Town halls, CSR initiatives and third-party validation</li></ul>
             <p class="hand note">&larr; fictional company</p>
+            <p class="sheet-prompt">Tap to read more &rarr;</p>
+            <div class="sheet-more"><h4 class="hand more-h">Overview</h4><p>A simulated digital crisis for DummyGasCorp, an energy company facing public backlash over its environmental and safety practices. The goal was to calm hostility on Facebook, counter misinformation and rebuild community trust through open, empathetic, rapid responses.</p><h4 class="hand more-h">Response</h4><ul class="more-list"><li><strong>Rapid de-escalation:</strong> corporate silence and defensiveness replaced by real-time, fact-based, empathetic dialogue.</li><li><strong>Command structure:</strong> the team reorganised into Community Managers (1-on-1 engagement), Statement Writers (official clarifications) and Content Creators (positive stories), removing bottlenecks and mixed messages.</li><li><strong>Third-party validation:</strong> independent partners GreenCheck (environmental auditing), GreenEnergy (a 25% CO2 reduction commitment) and TechPower (sustainable energy storage).</li></ul><h4 class="hand more-h">Protecting the brand</h4><ul class="more-list"><li><strong>Proactive transparency:</strong> moving from damage control to educational storytelling, with regular safety audits and compliance reports.</li><li><strong>Pre-emptive engagement:</strong> town-hall meetings with local governments, citizens and NGOs before new projects launch.</li><li><strong>Local CSR:</strong> environmental awareness, school support and community greening.</li></ul><h4 class="hand more-h">Skills shown</h4><p>Composure under pressure, strategic foresight, and cross-functional coordination for one clear, contradiction-free message.</p></div>
           </div>
+          <button type="button" class="sheet-btn" onclick="openStudy(this)" aria-label="Read the full project"></button>
         </article>
         <article class="sheet" style="--r:1deg">
           <div class="pl-14 pr-5 pt-6 pb-5">
@@ -489,7 +526,10 @@
             <p class="text-[13px] text-[#4a4036] leading-7 mt-1">An Instagram-led campaign that turns awareness of deforestation and wildfires into small, daily eco-habits.</p>
             <ul class="hand-list"><li>Audience and tone of voice built around Cyprus</li><li>Reels, carousels, quizzes and a weekly <mark>“Creature Identity Mystery”</mark></li><li>Events such as <span class="circled">Earth Day</span> and Zero Waste Day</li></ul>
             <p class="hand note">&larr; made for Cyprus</p>
+            <p class="sheet-prompt">Tap to read more &rarr;</p>
+            <div class="sheet-more"><h4 class="hand more-h">The problem</h4><p>Cypriot forests are threatened by deforestation, wildfires and droughts, driven by rising temperatures and desertification.</p><h4 class="hand more-h">Vision and brand</h4><p>The campaign aims to make Cyprus a global symbol of local action, by educating people about deforestation and inspiring small, daily eco-friendly habits. The name joins “Gaia”, the Greek goddess of the Earth, with “Green Vision”. The tone is inspiring, friendly, positive and activating.</p><h4 class="hand more-h">Audience</h4><p>Based entirely in Cyprus, split 51% men and 49% women, with the largest group aged 25–44. The top markets are Limassol (15.7%) and Nicosia (14.4%).</p><h4 class="hand more-h">Content plan</h4><ul class="more-list"><li><strong>Educational reels and posts:</strong> simple but rooted in science, using reels to combine image, sound and motion.</li><li><strong>Gamification:</strong> a weekly “Creature Identity Mystery” where users guess animals from audio cues and obscured images.</li><li><strong>Events and dates:</strong> tree planting in Paphos Forest, talks on forest fires, Zero Waste Day (30 March) and Earth Day (22 April).</li><li><strong>Carousels and quizzes:</strong> fun-fact carousels, IQ tests and “Myth or Fact” polls to build time on post and discussion.</li><li><strong>Actionable tips:</strong> bite-sized advice that turns awareness into daily routines.</li></ul></div>
           </div>
+          <button type="button" class="sheet-btn" onclick="openStudy(this)" aria-label="Read the full project"></button>
         </article>
         <article class="sheet" style="--r:-1.2deg">
           <div class="pl-14 pr-5 pt-6 pb-5">
@@ -501,7 +541,10 @@
             <p class="text-[13px] text-[#4a4036] leading-7 mt-1">A cosmetics brand built on AI and AR, with virtual try-ons, mapped on a full Business Model Canvas.</p>
             <ul class="hand-list"><li>Segments: Gen Z, beauty professionals and B2B clients</li><li><mark>AI recommendations</mark>, virtual try-ons and smart-mirror stores</li><li>Revenue from retail, subscriptions and B2B integrations</li></ul>
             <p class="hand note">&larr; fictional brand</p>
+            <p class="sheet-prompt">Tap to read more &rarr;</p>
+            <div class="sheet-more"><h4 class="hand more-h">Overview</h4><p>MakeupM is a fictional, tech-forward cosmetics company that uses AI and AR to change beauty retail. It serves consumers directly and other businesses (B2B), combining personalised makeup diagnostics, virtual testing and AI integration support for third-party brands, on a scalable Business Model Canvas.</p><h4 class="hand more-h">Business Model Canvas</h4><ul class="more-list"><li><strong>Customer segments:</strong> Gen Z and Millennials; beauty professionals (makeup artists, aestheticians, influencers); B2B clients wanting AI evaluation and integration.</li><li><strong>Value proposition:</strong> personalised recommendations from AI analysis of skin tone, type and facial features, camera-based virtual try-ons and tailored AI beauty advice.</li><li><strong>Channels:</strong> a digital platform and app, physical stores with AI smart mirrors, digital ads, influencer partnerships and social purchase links.</li><li><strong>Customer relationships:</strong> 24/7 AI chatbot support and AI-customised loyalty programmes, discounts and suggestions.</li><li><strong>Revenue streams:</strong> retail sales (store, web, app, social), premium AI skin-analysis subscriptions, and B2B setup, upgrades and support.</li><li><strong>Key resources:</strong> the AI/AR platforms, the technical team, patents and retail staff.</li><li><strong>Key activities:</strong> cosmetic manufacturing, AI development and maintenance, and digital campaigns.</li><li><strong>Key partners:</strong> retailers, logistics companies, influencers, and universities and research centres.</li><li><strong>Cost structure:</strong> manufacturing and logistics, payroll, digital marketing and ongoing AI support.</li></ul></div>
           </div>
+          <button type="button" class="sheet-btn" onclick="openStudy(this)" aria-label="Read the full project"></button>
         </article>
       </div>
     </div>
@@ -909,6 +952,52 @@
     emergeData = items.map(it => ({ ...it, isVideo: VIDEO_EXT.includes(it.src.split('?')[0].split('.').pop().toLowerCase()) }));
     renderEmerge();
   }
+
+  /* ---- Study notebook pages: open one in a window at the front ---- */
+  const studyModal = document.getElementById('study-modal');
+  const studyContent = document.getElementById('study-content');
+  let studyIndex = 0;
+  const studySheets = () => Array.from(document.querySelectorAll('#studies .sheet'));
+
+  function renderStudy() {
+    const clone = studySheets()[studyIndex].cloneNode(true);
+    clone.classList.add('sheet-open', 'reel-pop');
+    clone.style.setProperty('--r', '0deg');
+    const btn = clone.querySelector('.sheet-btn');
+    if (btn) btn.remove();
+    studyContent.innerHTML = '';
+    studyContent.appendChild(clone);
+    studyContent.scrollTop = 0;
+  }
+  function openStudy(btn) {
+    studyIndex = studySheets().indexOf(btn.closest('.sheet'));
+    renderStudy();
+    studyModal.classList.remove('hidden');
+    studyModal.classList.add('flex');
+    void studyModal.offsetWidth;
+    studyModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeStudy() {
+    studyModal.classList.remove('open');
+    setTimeout(() => {
+      studyModal.classList.add('hidden');
+      studyModal.classList.remove('flex');
+      studyContent.innerHTML = '';
+      document.body.style.overflow = '';
+    }, 250);
+  }
+  function studyStep(d) {
+    const n = studySheets().length;
+    studyIndex = (studyIndex + d + n) % n;
+    renderStudy();
+  }
+  document.addEventListener('keydown', e => {
+    if (!studyModal.classList.contains('open')) return;
+    if (e.key === 'Escape') closeStudy();
+    if (e.key === 'ArrowRight') studyStep(1);
+    if (e.key === 'ArrowLeft') studyStep(-1);
+  });
 
   /* ---- Lightbox: single-item expanded viewer, shared across all sections ---- */
   let lightboxCategory = null;
